@@ -1,0 +1,60 @@
+---
+- name: Ensure keyring directory is present
+  ansible.builtin.file:
+    mode: '0755'
+    group: root
+    owner: root
+    path: /etc/apt/keyrings
+    state: directory
+
+- name: Install gpg key
+  ansible.builtin.get_url:
+    url: https://apt.grafana.com/gpg.key
+    dest: /etc/apt/keyrings/grafana.asc
+    mode: '0644'
+    force: true
+
+- name: Setup Grafana repo
+  ansible.builtin.apt_repository:
+    filename: grafana
+    repo: "deb [signed-by=/etc/apt/keyrings/grafana.asc] https://apt.grafana.com stable main"
+    state: present
+
+- name: Install package
+  ansible.builtin.apt:
+    name: "tempo={{ grafana_tempo_version }}"
+    state: "present"
+    allow_downgrade: true
+
+- name: Install certificate key
+  ansible.builtin.copy:
+    mode: '0600'
+    owner: tempo
+    group: nogroup
+    dest: /etc/tempo/cert.key
+    content: "{{ grafana_tempo_cert_key }}"
+  when: grafana_tempo_cert_key is defined
+
+- name: Install certificate file
+  ansible.builtin.copy:
+    mode: '0600'
+    owner: tempo
+    group: nogroup
+    dest: /etc/tempo/cert.file
+    content: "{{ grafana_tempo_cert_file | mandatory }}"
+  when: grafana_tempo_cert_key is defined
+
+- name: Configure
+  ansible.builtin.template:
+    src: templates/tempo_config.yml.j2
+    dest: /etc/tempo/config.yml
+    mode: '0600'
+    owner: tempo
+    group: nogroup
+
+- name: Start service
+  ansible.builtin.systemd:
+    daemon-reload: true
+    enabled: true
+    state: started
+    name: tempo.service

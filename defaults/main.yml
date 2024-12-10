@@ -1,0 +1,54 @@
+---
+tempo_version: "2.6.1"
+tempo_http_port: 3200
+tempo_grpc_port: 9096
+tempo_block_retention: '336h' # 14 days
+tempo_local_path: /data/tempo
+# tempo_cert_file:
+# tempo_cert_key: 
+
+tempo_server_config:
+  http_listen_port: {{ tempo_http_port }}
+
+  grpc_listen_port: {{ tempo_grpc_port }}
+
+tempo_distributor_config:
+  receivers:
+    otlp:
+      protocols:
+        http:
+        grpc:
+
+tempo_ingester_config:
+
+tempo_metrics_generator_config:
+
+tempo_query_frontend_config:
+
+tempo_querier_config:
+
+tempo_compacter_config:
+  compaction:
+    block_retention: {{ tempo_block_retention }}
+
+tempo_memberlist_config:
+
+tempo_storage_config:
+  trace:
+    backend: local
+    local:
+      path: {{ tempo_local_path }}
+
+tempo_extra_config:
+
+tempo_config:
+  server: {{ tempo_server_config }}
+  distributor: {{ tempo_distributor_config }}
+  ingester: {{ tempo_ingester_config }}
+  metrics_generator: {{ tempo_metrics_generator_config }}
+  query_frontend: {{ tempo_query_frontend_config }}
+  querier: {{ tempo_querier_config }}
+  compacter: {{ tempo_compacter_config }}
+  storage: {{ tempo_storage_config }}
+  memberlist: {{ tempo_memberlist_config }}
+  {{ tempo_extra_config }}
