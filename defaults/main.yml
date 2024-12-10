@@ -5,12 +5,20 @@ tempo_grpc_port: 9096
 tempo_block_retention: '336h' # 14 days
 tempo_local_path: /data/tempo
 # tempo_cert_file:
-# tempo_cert_key: 
+# tempo_cert_key:
 
 tempo_server_config:
   http_listen_port: {{ tempo_http_port }}
 
   grpc_listen_port: {{ tempo_grpc_port }}
+
+tempo_tls_server_config:
+  http_tls_config:
+    cert_file: /etc/tempo/cert.file
+    cert_key: /etc/tempo/cert.key
+  grpc_tls_config:
+    cert_file: /etc/tempo/cert.file
+    cert_key: /etc/tempo/cert.key
 
 tempo_distributor_config:
   receivers:
@@ -42,7 +50,7 @@ tempo_storage_config:
 tempo_extra_config:
 
 tempo_config:
-  server: {{ tempo_server_config }}
+  server: {{ (tempo_server_config | ansible.builtin.combine(tempo_tls_server_config, recursive=true)) if tempo_cert_key is defined else tempo_server_config }}
   distributor: {{ tempo_distributor_config }}
   ingester: {{ tempo_ingester_config }}
   metrics_generator: {{ tempo_metrics_generator_config }}
