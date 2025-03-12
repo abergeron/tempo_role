@@ -8,9 +8,9 @@ tempo_local_path: /data/tempo
 # tempo_cert_key:
 
 tempo_server_config:
-  http_listen_port: {{ tempo_http_port }}
+  http_listen_port: "{{ tempo_http_port }}"
 
-  grpc_listen_port: {{ tempo_grpc_port }}
+  grpc_listen_port: "{{ tempo_grpc_port }}"
 
 tempo_tls_server_config:
   http_tls_config:
@@ -37,7 +37,7 @@ tempo_querier_config:
 
 tempo_compacter_config:
   compaction:
-    block_retention: {{ tempo_block_retention }}
+    block_retention: "{{ tempo_block_retention }}"
 
 tempo_memberlist_config:
 
@@ -45,18 +45,19 @@ tempo_storage_config:
   trace:
     backend: local
     local:
-      path: {{ tempo_local_path }}
+      path: "{{ tempo_local_path }}"
 
 tempo_extra_config:
 
-tempo_config:
-  server: {{ (tempo_server_config | ansible.builtin.combine(tempo_tls_server_config, recursive=true)) if tempo_cert_key is defined else tempo_server_config }}
-  distributor: {{ tempo_distributor_config }}
-  ingester: {{ tempo_ingester_config }}
-  metrics_generator: {{ tempo_metrics_generator_config }}
-  query_frontend: {{ tempo_query_frontend_config }}
-  querier: {{ tempo_querier_config }}
-  compacter: {{ tempo_compacter_config }}
-  storage: {{ tempo_storage_config }}
-  memberlist: {{ tempo_memberlist_config }}
-  {{ tempo_extra_config }}
+tempo_config_default:
+  server: "{{ (tempo_server_config | ansible.builtin.combine(tempo_tls_server_config, recursive=true)) if tempo_cert_key is defined else tempo_server_config }}"
+  distributor: "{{ tempo_distributor_config }}"
+  ingester: "{{ tempo_ingester_config }}"
+  metrics_generator: "{{ tempo_metrics_generator_config }}"
+  query_frontend: "{{ tempo_query_frontend_config }}"
+  querier: "{{ tempo_querier_config }}"
+  compacter: "{{ tempo_compacter_config }}"
+  storage: "{{ tempo_storage_config }}"
+  memberlist: "{{ tempo_memberlist_config }}"
+
+tempo_config: "{{ tempo_config_default | ansible.builtin.combine(tempo_extra_config, recursive=true) }}"
